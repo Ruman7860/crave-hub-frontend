@@ -1,18 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { Search, MapPin, ShoppingBag, User, LogOut, FileText, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  Search, ShoppingBag, User, LogOut,
+  FileText, Menu
+} from "lucide-react";
 import { useState } from "react";
 import { logout } from "@/actions/auth/auth.actions";
 import Image from "next/image";
+import { useSharedLocation } from "@/hooks/use-shared-location";
+import { MobileLocationStrip, NavbarLocationDropdown } from "./location-controls";
+import { NavbarUser } from "./index";
 
-export function CustomerNavbar({ user }: { user: any }) {
+export function CustomerNavbar({ user }: { user: NavbarUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { location, isRefreshing, refreshLocation } = useSharedLocation();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b backdrop-blur-md bg-white/80 dark:bg-zinc-950/80 border-gray-100 dark:border-gray-800 shadow-sm transition-all">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+
         {/* Left: Logo */}
         <div className="flex items-center gap-2 shrink-0">
           <Link href="/home" className="flex items-center gap-2 group">
@@ -25,14 +32,15 @@ export function CustomerNavbar({ user }: { user: any }) {
           </Link>
         </div>
 
-        {/* Center: Search & Location (Hidden on strict mobile) */}
+        {/* Center: Search & Location */}
         <div className="hidden md:flex flex-1 max-w-xl mx-8 items-center gap-2">
-          <div className="flex w-full items-center h-11 bg-gray-50/50 dark:bg-muted/50 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden hover:border-orange-200 focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
-            <div className="flex shrink-0 items-center pl-3 pr-2 text-gray-500 gap-1 border-r border-gray-200 dark:border-gray-700 bg-gray-100/30">
-              <MapPin className="h-4 w-4 text-orange-600" />
-              <span className="text-sm font-medium">New York</span>
-            </div>
-            <div className="flex-1 flex items-center px-3">
+          <div className="flex w-full items-center h-11 bg-gray-50/50 dark:bg-muted/50 border border-gray-200 dark:border-gray-800 rounded-xl overflow-visible hover:border-orange-200 focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+
+            {/* Location pill — clickable */}
+            <NavbarLocationDropdown location={location} isRefreshing={isRefreshing} onRefresh={refreshLocation} />
+
+            {/* Search input */}
+            <div className="flex-1 flex items-center px-3 overflow-hidden rounded-r-xl">
               <Search className="h-4 w-4 text-gray-400 mr-2 shrink-0" />
               <input
                 type="text"
@@ -59,18 +67,11 @@ export function CustomerNavbar({ user }: { user: any }) {
           <div className="relative group ml-2">
             <button className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-zinc-800 border-2 border-transparent hover:border-gray-200 dark:hover:border-zinc-700 transition-all">
               {user.image ? (
-                <Image
-                  src={user.image}
-                  alt={user.name}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
+                <Image src={user.image} alt={user.name || "User"} width={32} height={32} className="rounded-full" />
               ) : (
                 <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               )}
             </button>
-            {/* Simple Dropdown Hover */}
             <div className="absolute right-0 top-full z-50 mt-1 w-48 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all translate-y-1 group-hover:translate-y-0 origin-top-right">
               <div className="p-2 flex flex-col gap-1">
                 <Link href="/profile" className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-lg transition-colors">
@@ -89,6 +90,8 @@ export function CustomerNavbar({ user }: { user: any }) {
 
           <button
             className="md:hidden p-2 text-gray-600"
+            type="button"
+            aria-label="Toggle menu"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <Menu className="h-5 w-5" />
@@ -96,9 +99,14 @@ export function CustomerNavbar({ user }: { user: any }) {
         </div>
       </div>
 
-      {/* Mobile Search Bar Expansion */}
+      {/* Mobile Search */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-100 dark:border-gray-800 p-4 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md">
+        <div className="md:hidden border-t border-gray-100 dark:border-gray-800 p-4 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md space-y-3">
+
+          {/* Mobile location strip */}
+          <MobileLocationStrip location={location} isRefreshing={isRefreshing} onRefresh={refreshLocation} />
+
+          {/* Mobile search */}
           <div className="flex w-full items-center h-11 bg-gray-50 dark:bg-muted/50 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
             <div className="flex-1 flex items-center px-3">
               <Search className="h-4 w-4 text-gray-400 mr-2 shrink-0" />

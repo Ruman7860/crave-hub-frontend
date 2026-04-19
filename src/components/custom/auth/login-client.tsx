@@ -46,7 +46,6 @@ const LoginClient = ({ login }: LoginProps) => {
     try {
       setLoading(true);
       const result = await login(loginData);
-      console.log(result);
       if (result.accessToken) {
         toast.success(result.message || "Login successful!");
         router.push("/select-role");

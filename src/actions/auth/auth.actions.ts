@@ -3,7 +3,6 @@ import { getToken, removeToken, storeToken } from "@/lib/auth-utils";
 import { cookies } from "next/headers";
 
 const login = async (data: any) => {
-  console.log("Login Data -> ", data);
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_SERVICE}/api/auth/login`, {
       method: "POST",
@@ -53,7 +52,6 @@ const getMe = async () => {
 }
 
 const signup = async (data: any) => {
-  console.log("Signup Data -> ", data);
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_SERVICE}/api/auth/signup`, {
       method: "POST",

@@ -16,7 +16,6 @@ const addUserRole = async (roleData: { role: string, id: string }) => {
         });
         if(res.ok){
             const result = await res.json();
-            console.log("result -> ",result)
             // setting access token to cookies
             await storeToken(result.accessToken);
             return result;

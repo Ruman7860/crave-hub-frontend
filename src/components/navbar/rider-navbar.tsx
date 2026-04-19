@@ -1,26 +1,30 @@
 "use client";
-
 import Link from "next/link";
 import { Bike, ListOrdered, Wallet, History, User, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth/auth.actions";
 import Image from "next/image";
+import { useSharedLocation } from "@/hooks/use-shared-location";
+import { MobileLocationStrip, NavbarLocationDropdown } from "./location-controls";
+import { NavbarUser } from "./index";
 
 // If the project doesn't have shadcn Switch installed, I will inline a basic toggle component for safety.
 const ToggleSwitch = ({ checked, onChange }: { checked: boolean, onChange: () => void }) => (
-  <button 
+  <button
     onClick={onChange}
+    aria-label="checked"
     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-700'}`}
   >
     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
   </button>
 );
 
-export function RiderNavbar({ user }: { user: any }) {
+export function RiderNavbar({ user }: { user: NavbarUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
   const pathname = usePathname();
+  const { location, isRefreshing, refreshLocation } = useSharedLocation();
 
   const navLinks = [
     { name: "Active Orders", href: "/rider/orders", icon: ListOrdered },
@@ -34,7 +38,7 @@ export function RiderNavbar({ user }: { user: any }) {
         {/* Left: Logo */}
         <div className="flex items-center gap-2 shrink-0 mr-8">
           <Link href="/rider" className="flex items-center gap-2 group">
-             <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform shadow-lg shadow-blue-500/20">
+            <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform shadow-lg shadow-blue-500/20">
               <Bike className="h-5 w-5" />
             </div>
             <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-gray-100 hidden sm:inline-block">
@@ -52,11 +56,10 @@ export function RiderNavbar({ user }: { user: any }) {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-                  isActive 
-                    ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" 
-                    : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-900/50"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${isActive
+                  ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                  : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-900/50"
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 {link.name}
@@ -67,6 +70,17 @@ export function RiderNavbar({ user }: { user: any }) {
 
         {/* Right: Profile Actions + Toggle */}
         <div className="flex items-center gap-4">
+          <div className="hidden lg:block">
+            <NavbarLocationDropdown
+              location={location}
+              isRefreshing={isRefreshing}
+              onRefresh={refreshLocation}
+              buttonClassName="flex h-10 shrink-0 items-center gap-1 rounded-full border border-blue-100 bg-blue-50/80 pl-3 pr-2 text-blue-700 transition-colors hover:bg-blue-100/80 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300"
+              textClassName="max-w-28 truncate text-sm font-medium"
+              iconClassName="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400"
+            />
+          </div>
+
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-zinc-900/50">
             <span className={`text-[13px] font-bold ${isOnline ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
               {isOnline ? 'Online' : 'Offline'}
@@ -79,7 +93,7 @@ export function RiderNavbar({ user }: { user: any }) {
               {user.image ? (
                 <Image
                   src={user.image}
-                  alt={user.name}
+                  alt={user.name || "User"}
                   width={32}
                   height={32}
                   className="rounded-full"
@@ -95,8 +109,8 @@ export function RiderNavbar({ user }: { user: any }) {
                 </Link>
                 <div className="h-px bg-gray-100 dark:bg-gray-800 my-1 flex sm:hidden" />
                 <div className="flex sm:hidden items-center justify-between px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-lg transition-colors">
-                   <span className="font-semibold">{isOnline ? 'Go Offline' : 'Go Online'}</span>
-                   <ToggleSwitch checked={isOnline} onChange={() => setIsOnline(!isOnline)} />
+                  <span className="font-semibold">{isOnline ? 'Go Offline' : 'Go Online'}</span>
+                  <ToggleSwitch checked={isOnline} onChange={() => setIsOnline(!isOnline)} />
                 </div>
                 <div className="h-px bg-gray-100 dark:bg-gray-800 my-1" />
                 <button onClick={logout} className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors w-full text-left">
@@ -106,8 +120,9 @@ export function RiderNavbar({ user }: { user: any }) {
             </div>
           </div>
 
-          <button 
+          <button
             className="md:hidden p-2 text-gray-600"
+            aria-label="Menu"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <Menu className="h-5 w-5" />
@@ -118,7 +133,10 @@ export function RiderNavbar({ user }: { user: any }) {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md">
-          <nav className="flex flex-col p-4 gap-1">
+          <div className="p-4 pb-2">
+            <MobileLocationStrip location={location} isRefreshing={isRefreshing} onRefresh={refreshLocation} />
+          </div>
+          <nav className="flex flex-col px-4 pb-4 gap-1">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               const Icon = link.icon;
@@ -126,11 +144,10 @@ export function RiderNavbar({ user }: { user: any }) {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                    isActive 
-                      ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" 
-                      : "text-gray-600 hover:text-gray-900 dark:text-gray-400"
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${isActive
+                    ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                    : "text-gray-600 hover:text-gray-900 dark:text-gray-400"
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Icon className="h-5 w-5" />

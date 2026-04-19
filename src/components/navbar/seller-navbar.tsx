@@ -6,10 +6,14 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth/auth.actions";
 import Image from "next/image";
+import { useSharedLocation } from "@/hooks/use-shared-location";
+import { MobileLocationStrip, NavbarLocationDropdown } from "./location-controls";
+import { NavbarUser } from "./index";
 
-export function SellerNavbar({ user }: { user: any }) {
+export function SellerNavbar({ user }: { user: NavbarUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { location, isRefreshing, refreshLocation } = useSharedLocation();
 
   const navLinks = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -24,7 +28,7 @@ export function SellerNavbar({ user }: { user: any }) {
         {/* Left: Logo */}
         <div className="flex items-center gap-2 shrink-0 mr-8">
           <Link href="/dashboard" className="flex items-center gap-2 group">
-             <div className="w-8 h-8 rounded-xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 font-bold text-xl group-hover:scale-105 transition-transform shadow-lg">
+            <div className="w-8 h-8 rounded-xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 font-bold text-xl group-hover:scale-105 transition-transform shadow-lg">
               <Store className="h-4 w-4" />
             </div>
             <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-gray-100">
@@ -42,11 +46,10 @@ export function SellerNavbar({ user }: { user: any }) {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  isActive 
-                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-gray-100" 
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${isActive
+                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
                     : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-900/50"
-                }`}
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 {link.name}
@@ -57,12 +60,22 @@ export function SellerNavbar({ user }: { user: any }) {
 
         {/* Right: Profile Actions */}
         <div className="flex items-center gap-3">
+          <div className="hidden lg:block">
+            <NavbarLocationDropdown
+              location={location}
+              isRefreshing={isRefreshing}
+              onRefresh={refreshLocation}
+              buttonClassName="flex h-10 shrink-0 items-center gap-1 rounded-full border border-gray-200 bg-white/70 pl-3 pr-2 text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-zinc-900/70 dark:text-gray-300"
+              textClassName="max-w-28 truncate text-sm font-medium"
+            />
+          </div>
+
           <div className="relative group ml-2">
             <button className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-zinc-800 border-2 border-transparent hover:border-gray-200 dark:hover:border-zinc-700 transition-all">
               {user.image ? (
                 <Image
                   src={user.image}
-                  alt={user.name}
+                  alt={user.name || "User"}
                   width={32}
                   height={32}
                   className="rounded-full"
@@ -84,7 +97,8 @@ export function SellerNavbar({ user }: { user: any }) {
             </div>
           </div>
 
-          <button 
+          <button
+            aria-label="Menu"
             className="md:hidden p-2 text-gray-600"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
@@ -96,7 +110,10 @@ export function SellerNavbar({ user }: { user: any }) {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md">
-          <nav className="flex flex-col p-4 gap-1">
+          <div className="p-4 pb-2">
+            <MobileLocationStrip location={location} isRefreshing={isRefreshing} onRefresh={refreshLocation} />
+          </div>
+          <nav className="flex flex-col px-4 pb-4 gap-1">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               const Icon = link.icon;
@@ -104,11 +121,10 @@ export function SellerNavbar({ user }: { user: any }) {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                    isActive 
-                      ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-gray-100" 
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${isActive
+                      ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
                       : "text-gray-600 hover:text-gray-900 dark:text-gray-400"
-                  }`}
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Icon className="h-5 w-5" />

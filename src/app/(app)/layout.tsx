@@ -5,7 +5,7 @@ import { Navbar } from '@/components/navbar';
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
     const user = await getMe();
-    console.log(user);
+
     if (user.error === 'Unauthorized' || user.statusCode === 401) {
         redirect("/login");
     }
