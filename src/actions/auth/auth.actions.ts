@@ -21,7 +21,7 @@ const login = async (data: any) => {
 
     return result;
   } catch (error) {
-    console.log("Error while Login -> ", error);
+    console.error("Error while Login -> ", error);
     throw error;
   }
 };
@@ -46,7 +46,7 @@ const getMe = async () => {
     const result = await res.json();
     return result;
   } catch (error) {
-    console.log("Error while getting me -> ", error);
+    console.error("Error while getting me -> ", error);
     throw error;
   }
 }
@@ -66,7 +66,7 @@ const signup = async (data: any) => {
     // It returns { message, data: user }
     return result;
   } catch (error) {
-    console.log("Error while Signup -> ", error);
+    console.error("Error while Signup -> ", error);
     throw error;
   }
 };
@@ -76,7 +76,7 @@ const logout = async () => {
     await removeToken();
     return { success: true };
   } catch (error) {
-    console.log("Error while Logout -> ", error);
+    console.error("Error while Logout -> ", error);
     throw error;
   }
 }

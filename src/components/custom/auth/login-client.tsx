@@ -53,7 +53,7 @@ const LoginClient = ({ login }: LoginProps) => {
         toast.error(result.message || "Login failed");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("An error occurred during login.");
     } finally {
       setLoading(false);

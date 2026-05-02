@@ -21,7 +21,7 @@ const addUserRole = async (roleData: { role: string, id: string }) => {
             return result;
         }
     } catch (error) {
-        console.log("Error while adding user role -> ", error);
+        console.error("Error while adding user role -> ", error);
         throw error;
     }
 }

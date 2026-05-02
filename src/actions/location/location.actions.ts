@@ -21,7 +21,7 @@ const getUserLocation = async (body: LocationType) => {
       return res.json();
     }
   } catch (error) {
-    console.log("Error while getting user location -> ", error);
+    console.error("Error while getting user location -> ", error);
     throw error;
   }
 }
