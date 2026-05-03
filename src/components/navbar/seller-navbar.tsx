@@ -67,6 +67,7 @@ export function SellerNavbar({ user }: { user: NavbarUser }) {
               onRefresh={refreshLocation}
               buttonClassName="flex h-10 shrink-0 items-center gap-1 rounded-full border border-gray-200 bg-white/70 pl-3 pr-2 text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-zinc-900/70 dark:text-gray-300"
               textClassName="max-w-28 truncate text-sm font-medium"
+              dropdownClassName="absolute -left-36 top-10 z-60 mt-2 w-72 rounded-xl border border-gray-100 bg-white p-4 shadow-xl dark:border-gray-800 dark:bg-zinc-900"
             />
           </div>
 
