@@ -16,15 +16,7 @@ export const getMine = async () => {
 
     const result = await res.json();
 
-    
-    
-    // When the backend generates a new token because the restaurantId was missing
-    if (result.accessToken && result.restaurant) {
-      await storeToken(result.accessToken);
-      return result.restaurant;
-    }
-
-    return result; // If no new token, the backend either returned the restaurant or an error
+    return result;
   } catch (error) {
     console.error("Error while getting restaurant -> ", error);
     throw error;

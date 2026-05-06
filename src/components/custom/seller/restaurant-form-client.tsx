@@ -8,12 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { createRestaurant, updateRestaurant } from "@/actions/seller/seller.actions";
-import { Store, MapPin, Phone, FileText, Image as ImageIcon, X, Maximize2, RefreshCw } from "lucide-react";
+import { Store, MapPin, Phone, FileText, Images as ImagesIcon, X, Maximize2, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
 import { useSharedLocation } from "@/hooks/use-shared-location";
+
+const MAX_IMAGES = 5;
 
 const restaurantSchema = z.object({
   name: z.string().min(2, "Restaurant name must be at least 2 characters."),
@@ -30,8 +32,16 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
   const isEditing = !!initialData;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image || null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Existing images from server (presigned URLs for display, editable)
+  const [existingImages, setExistingImages] = useState<string[]>(
+    initialData?.images ?? [],
+  );
+  // New local files picked by the user
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+
+  const [fullscreenSrc, setFullscreenSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { location, isRefreshing, refreshLocation } = useSharedLocation();
@@ -46,6 +56,8 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
     },
   });
 
+  const totalImages = existingImages.length + newPreviews.length;
+
   const onSubmit = async (data: z.infer<typeof restaurantSchema>) => {
     setLoading(true);
 
@@ -56,7 +68,6 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
       formData.set("phone", data.phone);
       formData.set("isOpen", data.isOpen ? "true" : "false");
 
-      // Attach internal location
       if (location.lat && location.lng) {
         formData.set("latitude", location.lat.toString());
         formData.set("longitude", location.lng.toString());
@@ -65,15 +76,8 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
         }
       }
 
-      // Handle image
-      if (fileInputRef.current?.files?.[0]) {
-        formData.set("image", fileInputRef.current.files[0]);
-      } else if (isEditing && !imagePreview) {
-        // If editing and image preview is null, it means user removed the image.
-        // Wait, the backend doesn't explicitly delete the image unless we pass a specific flag, 
-        // but passing an empty file might do it if handled by the backend.
-        formData.append("image", new Blob(), "empty");
-      }
+      // Append each new file under the multi-file field name
+      newFiles.forEach((file) => formData.append("images", file));
 
       let result;
       if (isEditing) {
@@ -83,33 +87,46 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
       }
 
       if (result?.error || result?.statusCode >= 400) {
-        const errorMsg = Array.isArray(result.message) ? result.message.join(", ") : result.message || result.error;
+        const errorMsg = Array.isArray(result.message)
+          ? result.message.join(", ")
+          : result.message || result.error;
         toast.error(errorMsg || "Failed to save restaurant");
       } else {
         toast.success(isEditing ? "Restaurant updated!" : "Restaurant created!");
         router.push("/dashboard");
       }
-    } catch (err) {
+    } catch {
       toast.error("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setImagePreview(url);
-    }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files ?? []);
+    const remaining = MAX_IMAGES - existingImages.length - newFiles.length;
+    const toAdd = picked.slice(0, remaining);
+
+    setNewFiles((prev) => [...prev, ...toAdd]);
+    setNewPreviews((prev) => [
+      ...prev,
+      ...toAdd.map((f) => URL.createObjectURL(f)),
+    ]);
+
+    // Reset so same file can be re-picked
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const removeImage = () => {
-    setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const removeExisting = (idx: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== idx));
   };
+
+  const removeNew = (idx: number) => {
+    setNewPreviews((prev) => prev.filter((_, i) => i !== idx));
+    setNewFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const allPreviews = [...existingImages, ...newPreviews];
 
   return (
     <>
@@ -127,6 +144,7 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
         </CardHeader>
         <CardContent className="py-6 sm:py-8">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* ── Name & Description ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <Controller
@@ -176,62 +194,88 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
                 />
               </div>
 
-              <div className="">
-                <Label className="text-gray-700 dark:text-gray-300">Restaurant Image</Label>
-                <div className={`border-2 mt-2 border-dashed h-44 ${imagePreview ? "border-transparent" : "border-gray-200 dark:border-zinc-800"} rounded-xl text-center transition-colors relative overflow-hidden group`}>
-                  {!imagePreview && (
-                    <div className="p-8 h-44 hover:bg-gray-50 dark:hover:bg-zinc-900/50 cursor-pointer">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        ref={fileInputRef}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                      />
-                      <div className="flex flex-col items-center text-gray-500 pointer-events-none">
-                        <ImageIcon className="w-10 h-10 mb-2 opacity-50" />
-                        <span className="font-medium">Click or drag image here</span>
-                        <span className="text-xs mt-1">PNG, JPG up to 5MB</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {imagePreview && (
-                    <div className="relative w-full h-44 rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-900">
-                      <Image src={imagePreview} alt="Preview" fill className="object-cover" />
-
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 z-20">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="icon"
-                          className="h-10 w-10 cursor-pointer rounded-full shadow-lg hover:scale-105 transition-transform"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setIsFullscreen(true);
-                          }}
-                        >
-                          <Maximize2 className="h-5 w-5" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="h-10 w-10 bg-white cursor-pointer rounded-full shadow-lg hover:scale-105 transition-transform"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            removeImage();
-                          }}
-                        >
-                          <X className="h-5 w-5" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+              {/* ── Image Upload ── */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-gray-700 dark:text-gray-300">
+                    Restaurant Images
+                  </Label>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                    {totalImages}/{MAX_IMAGES} images
+                  </span>
                 </div>
+
+                {/* Preview grid */}
+                {allPreviews.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {existingImages.map((src, idx) => (
+                      <div key={`existing-${idx}`} className="relative h-28 rounded-xl overflow-hidden group bg-gray-100 dark:bg-zinc-900">
+                        <Image src={src} alt={`Image ${idx + 1}`} fill className="object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition text-white"
+                            onClick={() => setFullscreenSrc(src)}
+                          >
+                            <Maximize2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            className="p-1.5 rounded-full bg-red-500/80 hover:bg-red-500 transition text-white"
+                            onClick={() => removeExisting(idx)}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {newPreviews.map((src, idx) => (
+                      <div key={`new-${idx}`} className="relative h-28 rounded-xl overflow-hidden group bg-gray-100 dark:bg-zinc-900 ring-2 ring-orange-400/50">
+                        <Image src={src} alt={`New image ${idx + 1}`} fill className="object-cover" />
+                        <div className="absolute top-1 right-1 bg-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">NEW</div>
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition text-white"
+                            onClick={() => setFullscreenSrc(src)}
+                          >
+                            <Maximize2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            className="p-1.5 rounded-full bg-red-500/80 hover:bg-red-500 transition text-white"
+                            onClick={() => removeNew(idx)}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Drop zone */}
+                {totalImages < MAX_IMAGES && (
+                  <div className="relative border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-xl h-28 hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <div className="flex flex-col items-center justify-center h-full text-gray-500 pointer-events-none gap-1">
+                      <ImagesIcon className="w-8 h-8 opacity-40" />
+                      <span className="text-sm font-medium">Click or drag images here</span>
+                      <span className="text-xs opacity-60">PNG, JPG — up to {MAX_IMAGES} total</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
+            {/* ── Phone & Status ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
               <Controller
                 name="phone"
@@ -283,6 +327,7 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
               />
             </div>
 
+            {/* ── Location ── */}
             <div className="border-gray-100 dark:border-zinc-800">
               <h3 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2 pb-2">
                 <MapPin className="w-5 h-5 text-red-500" /> Store Location
@@ -314,6 +359,7 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
               </div>
             </div>
 
+            {/* ── Actions ── */}
             <div className="flex justify-end gap-3">
               <Button
                 type="button"
@@ -336,24 +382,24 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
         </CardContent>
       </Card>
 
-      {/* Fullscreen Image Preview */}
-      {isFullscreen && imagePreview && (
+      {/* ── Fullscreen preview ── */}
+      {fullscreenSrc && (
         <div
-          className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm animate-in fade-in duration-200"
-          onClick={() => setIsFullscreen(false)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setFullscreenSrc(null)}
         >
           <button
             className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors bg-black/20 hover:bg-black/40 p-2 rounded-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsFullscreen(false);
-            }}
+            onClick={(e) => { e.stopPropagation(); setFullscreenSrc(null); }}
           >
             <X className="w-8 h-8" />
           </button>
-          <div className="relative w-full h-full max-w-5xl max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="relative w-full h-full max-w-5xl max-h-[85vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Image
-              src={imagePreview}
+              src={fullscreenSrc}
               alt="Fullscreen preview"
               fill
               className="object-contain rounded-lg"

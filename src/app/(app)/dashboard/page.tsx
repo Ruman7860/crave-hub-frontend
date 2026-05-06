@@ -49,8 +49,8 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
             Dashboard
@@ -58,7 +58,7 @@ export default async function DashboardPage() {
           <p className="text-gray-500 mt-1">Manage your restaurant details and settings.</p>
         </div>
         <Link href="/dashboard/restaurant/edit">
-          <Button variant="outline" className="border-gray-200 dark:border-zinc-800 shadow-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900">
+          <Button variant="outline" className="border-gray-200 dark:border-zinc-800 shadow-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900 cursor-pointer">
             Edit Restaurant
           </Button>
         </Link>
