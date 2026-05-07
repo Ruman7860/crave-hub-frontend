@@ -377,6 +377,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
                 checked={item.isAvailable}
                 disabled={busyItemId === item.id}
                 onCheckedChange={() => toggleAvailability(item)}
+                className="data-checked:bg-amber-600 data-unchecked:bg-input"
               />
               <span className={cn("text-sm", item.isAvailable ? "text-green-600 font-medium" : "text-gray-500")}>
                 {item.isAvailable ? "Available" : "Out of Stock"}
@@ -574,7 +575,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
                     onChange={(event) =>
                       table.getColumn("name")?.setFilterValue(event.target.value)
                     }
-                    className="pl-9 h-10 w-full md:max-w-[300px]"
+                    className="pl-9 h-10 w-full md:max-w-75"
                   />
                 </div>
                 <div className="flex items-center gap-2">
