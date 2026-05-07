@@ -83,7 +83,9 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
       if (isEditing) {
         result = await updateRestaurant(initialData.id, formData);
       } else {
+        console.log("formData -> ",formData);
         result = await createRestaurant(formData);
+        console.log("result -> ",result);
       }
 
       if (result?.error || result?.statusCode >= 400) {

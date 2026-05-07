@@ -16,8 +16,6 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  console.log("Restaurant", restaurant);
-
   if (restaurant?.statusCode === 404 || restaurant?.error === "Not Found" || restaurant?.message === "Restaurant not found") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
