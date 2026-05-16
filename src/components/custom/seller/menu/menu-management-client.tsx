@@ -275,7 +275,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
         cell: ({ row }) => {
           const item = row.original;
           return (
-            <div className="relative h-12 w-12 rounded-lg bg-gray-100 dark:bg-zinc-900 overflow-hidden flex-shrink-0 border border-gray-200 dark:border-zinc-800">
+            <div className="relative h-12 w-12 rounded-lg bg-gray-100 dark:bg-zinc-900 overflow-hidden shrink-0 border border-gray-200 dark:border-zinc-800">
               {item.image ? (
                 <Image src={item.image} alt={item.name} fill className="object-cover" />
               ) : (
@@ -303,7 +303,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
                   </Badge>
                 )}
               </div>
-              <div className="text-xs text-gray-500 max-w-[200px] truncate" title={item.description || ""}>
+              <div className="text-xs text-gray-500 max-w-50 truncate" title={item.description || ""}>
                 {item.description || "No description"}
               </div>
             </div>
@@ -482,8 +482,8 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
             </CardTitle>
             <CardDescription className="text-xs">Filter and manage menu categories.</CardDescription>
           </CardHeader>
-          <CardContent className="p-4 space-y-4">
-            <Button type="button" onClick={openCreateCategory} className="w-full bg-orange-600 hover:bg-orange-700 text-white h-9">
+          <CardContent className="pb-4 space-y-4">
+            <Button size={"sm"} type="button" onClick={openCreateCategory} className="w-full bg-orange-600 hover:bg-orange-700 text-white text-xs">
               <Plus className="w-4 h-4 mr-2" />
               Add Category
             </Button>
@@ -524,7 +524,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
                         <span className="truncate">{category.name}</span>
                         <Badge variant="outline" className="font-normal shrink-0">{categoryCounts[category.id] ?? 0}</Badge>
                       </button>
-                      <div className="absolute right-1 top-1/2 -translate-y-1/2 flex opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-l from-gray-50 dark:from-zinc-900 pl-2 rounded-r-lg">
+                      <div className="absolute right-1 top-1/2 -translate-y-1/2 flex opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-l from-gray-50 dark:from-zinc-900 pl-2 rounded-r-lg">
                         <button type="button" onClick={() => startEditCategory(category)} className="p-1.5 text-gray-400 hover:text-orange-600 transition-colors rounded-md" aria-label={`Edit ${category.name}`}>
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
@@ -542,7 +542,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
 
         <div className="space-y-4">
           {!hasCategories ? (
-            <div className="min-h-[400px] flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-900/40 text-center p-8">
+            <div className="min-h-100 flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-900/40 text-center p-8">
               <Tag className="w-12 h-12 text-gray-300 mb-3" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Create a category first</h2>
               <p className="text-sm text-gray-500 mt-1 max-w-md">Categories keep your seller dashboard tidy and make future ordering and drag-and-drop support straightforward.</p>
@@ -552,11 +552,11 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
               </Button>
             </div>
           ) : filteredItems.length === 0 ? (
-            <div className="min-h-[400px] flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-900/40 text-center p-8">
+            <div className="min-h-100 flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-900/40 text-center p-8">
               <UtensilsCrossed className="w-12 h-12 text-gray-300 mb-3" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">No menu items yet</h2>
               <p className="text-sm text-gray-500 mt-1">Add your first item with pricing, category, availability, and a food photo.</p>
-              <Button asChild className="mt-5 bg-orange-600 hover:bg-orange-700 text-white">
+              <Button size={"sm"} asChild className="mt-5 bg-orange-600 hover:bg-orange-700 text-white">
                 <Link href="/menu/items/new">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Item
@@ -575,7 +575,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
                     onChange={(event) =>
                       table.getColumn("name")?.setFilterValue(event.target.value)
                     }
-                    className="pl-9 h-10 w-full md:max-w-75"
+                    className="pl-9 h-10 w-full md:max-w-75 rounded-lg border border-gray-300 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-0"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -585,7 +585,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
                       table.getColumn("isVeg")?.setFilterValue(value)
                     }
                   >
-                    <SelectTrigger className="w-[120px] h-10">
+                    <SelectTrigger className="w-30 h-10">
                       <SelectValue placeholder="Type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -600,7 +600,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
                       table.getColumn("isAvailable")?.setFilterValue(value)
                     }
                   >
-                    <SelectTrigger className="w-[140px] h-10">
+                    <SelectTrigger className="w-35 h-10">
                       <SelectValue placeholder="Availability" />
                     </SelectTrigger>
                     <SelectContent>
@@ -843,7 +843,7 @@ function CompactMenuItemCard({
     <div className="flex flex-col gap-3 bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl p-3 shadow-sm">
       <div className="flex gap-3">
         {/* Image */}
-        <div className="relative h-16 w-16 rounded-lg bg-gray-100 dark:bg-zinc-900 overflow-hidden flex-shrink-0 border border-gray-100 dark:border-zinc-800">
+        <div className="relative h-16 w-16 rounded-lg bg-gray-100 dark:bg-zinc-900 overflow-hidden shrink-0 border border-gray-100 dark:border-zinc-800">
           {item.image ? (
             <Image src={item.image} alt={item.name} fill className="object-cover" />
           ) : (
