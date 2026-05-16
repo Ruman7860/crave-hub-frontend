@@ -298,7 +298,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
                 {item.name}
                 {item.isBestseller && (
                   <Badge className="bg-orange-600 hover:bg-orange-700 text-white border-none py-0 px-1.5 h-5 text-[10px]">
-                    <Star className="w-3 h-3 mr-1" />
+                    <Star className="w-3 h-3" />
                     Bestseller
                   </Badge>
                 )}
@@ -475,7 +475,7 @@ export function MenuManagementClient({ initialData }: { initialData: MenuData })
 
       <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 items-start">
         <Card className="shadow-sm pt-4 lg:sticky lg:top-20">
-          <CardHeader className="border-b border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 px-5 py-4">
+          <CardHeader className="border-b border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Tag className="w-5 h-5 text-orange-600" />
               Categories

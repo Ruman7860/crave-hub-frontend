@@ -379,7 +379,7 @@ export function MenuItemFormClient({
               </CardTitle>
               <CardDescription>One appetizing photo is required for new items.</CardDescription>
             </CardHeader>
-            <CardContent className="py-6">
+            <CardContent className="pb-6">
               <Controller
                 name="image"
                 control={form.control}
@@ -420,7 +420,7 @@ export function MenuItemFormClient({
               <CardTitle className="text-xl">Live Preview</CardTitle>
               <CardDescription>How this item will scan in the menu list.</CardDescription>
             </CardHeader>
-            <CardContent className="py-6">
+            <CardContent className="pb-6">
               <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-950">
                 <div className="relative h-44 bg-gray-100 dark:bg-zinc-900">
                   {imagePreview ? (

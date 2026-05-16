@@ -83,9 +83,9 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
       if (isEditing) {
         result = await updateRestaurant(initialData.id, formData);
       } else {
-        console.log("formData -> ",formData);
+        console.log("formData -> ", formData);
         result = await createRestaurant(formData);
-        console.log("result -> ",result);
+        console.log("result -> ", result);
       }
 
       if (result?.error || result?.statusCode >= 400) {
@@ -216,12 +216,14 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                           <button
                             type="button"
+                            aria-label="Set Full Screen"
                             className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition text-white"
                             onClick={() => setFullscreenSrc(src)}
                           >
                             <Maximize2 className="w-4 h-4" />
                           </button>
                           <button
+                            aria-label="Remove Existing"
                             type="button"
                             className="p-1.5 rounded-full bg-red-500/80 hover:bg-red-500 transition text-white"
                             onClick={() => removeExisting(idx)}
@@ -238,12 +240,14 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                           <button
                             type="button"
+                            aria-label="Set Full Screen"
                             className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition text-white"
                             onClick={() => setFullscreenSrc(src)}
                           >
                             <Maximize2 className="w-4 h-4" />
                           </button>
                           <button
+                            aria-label="Remove New"
                             type="button"
                             className="p-1.5 rounded-full bg-red-500/80 hover:bg-red-500 transition text-white"
                             onClick={() => removeNew(idx)}
@@ -316,7 +320,7 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
                           id="isOpen"
                           checked={field.value}
                           onChange={(e) => field.onChange(e.target.checked)}
-                          className="w-[18px] h-[18px] rounded border-gray-300 text-orange-600 focus:ring-orange-600 cursor-pointer"
+                          className="w-4.5 h-4.5 rounded border-gray-300 text-orange-600 focus:ring-orange-600 cursor-pointer"
                         />
                         <Label htmlFor="isOpen" className="font-medium cursor-pointer text-sm text-gray-900 dark:text-gray-100">
                           Open for business
@@ -391,6 +395,7 @@ export function RestaurantFormClient({ initialData }: RestaurantFormProps) {
           onClick={() => setFullscreenSrc(null)}
         >
           <button
+            aria-label="Cross"
             className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors bg-black/20 hover:bg-black/40 p-2 rounded-full"
             onClick={(e) => { e.stopPropagation(); setFullscreenSrc(null); }}
           >

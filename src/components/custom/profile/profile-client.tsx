@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Copy, User, CheckCircle2, XCircle, Mail, KeyRound, CalendarDays, Edit3, LogOut, ShieldAlert } from "lucide-react";
+import { Copy, User, CheckCircle2, XCircle, Mail, KeyRound, CalendarDays, Edit3, LogOut, ShieldAlert, MapPin, PackageOpen, Settings, Bell, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/actions/auth/auth.actions";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
       await logout();
       toast.success("Logged out successfully");
       router.push("/login");
-    } catch (err) {
+    } catch {
       toast.error("Logout failed.");
     }
   };
@@ -216,6 +216,59 @@ export default function ProfileClient({ user }: ProfileClientProps) {
           </div>
         </div>
 
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section className="bg-white dark:bg-zinc-950 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm p-5">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-gray-100">
+            <MapPin className="h-5 w-5 text-orange-600" /> Saved Addresses
+          </h3>
+          <div className="mt-4 space-y-3">
+            {[
+              ["Home", "Use current location for faster delivery"],
+              ["Work", "Add office address and delivery notes"],
+            ].map(([label, address]) => (
+              <div key={label} className="rounded-xl border border-orange-100 bg-orange-50/60 p-4 dark:border-zinc-800 dark:bg-zinc-900/60">
+                <p className="font-bold text-gray-950 dark:text-gray-50">{label}</p>
+                <p className="mt-1 text-sm text-gray-500">{address}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="bg-white dark:bg-zinc-950 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm p-5">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-gray-100">
+            <PackageOpen className="h-5 w-5 text-orange-600" /> Order History
+          </h3>
+          <div className="mt-4 flex min-h-40 flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 p-5 text-center dark:border-zinc-800">
+            <p className="font-bold text-gray-950 dark:text-gray-50">No orders yet</p>
+            <p className="mt-1 text-sm text-gray-500">Your Crave Hub orders will appear here after checkout.</p>
+          </div>
+        </section>
+
+        <section className="bg-white dark:bg-zinc-950 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm p-5">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-gray-100">
+            <Settings className="h-5 w-5 text-orange-600" /> Settings
+          </h3>
+          <div className="mt-4 space-y-3">
+            {[
+              [Bell, "Order alerts", "Push and email updates"],
+              [CreditCard, "Payment methods", "Cards and UPI options"],
+              [ShieldAlert, "Privacy", "Account safety controls"],
+            ].map(([Icon, label, description]) => {
+              const SettingsIcon = Icon as typeof Bell;
+              return (
+                <button key={label as string} className="flex w-full items-center gap-3 rounded-xl border border-gray-100 p-3 text-left transition hover:bg-gray-50 dark:border-zinc-800 dark:hover:bg-zinc-900">
+                  <SettingsIcon className="h-4 w-4 text-gray-500" />
+                  <span>
+                    <span className="block text-sm font-bold text-gray-950 dark:text-gray-50">{label as string}</span>
+                    <span className="block text-xs text-gray-500">{description as string}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
       </div>
     </div>
   );

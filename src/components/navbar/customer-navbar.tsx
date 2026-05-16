@@ -6,15 +6,27 @@ import {
   FileText, Menu
 } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAtomValue } from "jotai/react";
 import { logout } from "@/actions/auth/auth.actions";
 import Image from "next/image";
 import { useSharedLocation } from "@/hooks/use-shared-location";
 import { MobileLocationStrip, NavbarLocationDropdown } from "./location-controls";
 import { NavbarUser } from "./index";
+import { cartAtom } from "@/atoms/cart.atom";
 
 export function CustomerNavbar({ user }: { user: NavbarUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { location, isRefreshing, refreshLocation } = useSharedLocation();
+  const cart = useAtomValue(cartAtom);
+  const router = useRouter();
+  const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const submitSearch = (value: string) => {
+    if (value.trim()) {
+      router.push(`/home?search=${encodeURIComponent(value.trim())}`);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b backdrop-blur-md bg-white/80 dark:bg-zinc-950/80 border-gray-100 dark:border-gray-800 shadow-sm transition-all">
@@ -46,6 +58,9 @@ export function CustomerNavbar({ user }: { user: NavbarUser }) {
                 type="text"
                 placeholder="Search for restaurants, cuisine or a dish"
                 className="w-full bg-transparent outline-none text-sm placeholder:text-gray-400 dark:text-gray-200"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") submitSearch(event.currentTarget.value);
+                }}
               />
             </div>
           </div>
@@ -59,9 +74,11 @@ export function CustomerNavbar({ user }: { user: NavbarUser }) {
 
           <Link href="/cart" className="relative p-2 text-gray-600 hover:text-orange-600 dark:text-gray-300 transition-colors group">
             <ShoppingBag className="h-5 w-5 group-hover:scale-110 transition-transform" />
-            <span className="absolute top-0 right-0 flex items-center justify-center h-4 w-4 text-[10px] font-bold text-white bg-orange-600 rounded-full border-2 border-white dark:border-zinc-950">
-              3
-            </span>
+            {cartCount ? (
+              <span className="absolute top-0 right-0 flex items-center justify-center h-4 min-w-4 px-1 text-[10px] font-bold text-white bg-orange-600 rounded-full border-2 border-white dark:border-zinc-950">
+                {cartCount}
+              </span>
+            ) : null}
           </Link>
 
           <div className="relative group ml-2">
@@ -114,6 +131,9 @@ export function CustomerNavbar({ user }: { user: NavbarUser }) {
                 type="text"
                 placeholder="Search for restaurants or dishes"
                 className="w-full bg-transparent outline-none text-sm placeholder:text-gray-400"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") submitSearch(event.currentTarget.value);
+                }}
               />
             </div>
           </div>
