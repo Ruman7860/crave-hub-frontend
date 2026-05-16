@@ -60,12 +60,14 @@ function ImageGallery({ images, restaurantName }: { images: string[]; restaurant
         {images.length > 1 && (
           <>
             <button
+              aria-label="Left"
               onClick={(e) => { e.stopPropagation(); prev(); }}
               className="absolute left-3 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
+              aria-label="Right"
               onClick={(e) => { e.stopPropagation(); next(); }}
               className="absolute right-3 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
             >

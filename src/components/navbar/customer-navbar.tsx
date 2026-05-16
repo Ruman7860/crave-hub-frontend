@@ -7,20 +7,19 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAtomValue } from "jotai/react";
 import { logout } from "@/actions/auth/auth.actions";
 import Image from "next/image";
 import { useSharedLocation } from "@/hooks/use-shared-location";
 import { MobileLocationStrip, NavbarLocationDropdown } from "./location-controls";
 import { NavbarUser } from "./index";
-import { cartAtom } from "@/atoms/cart.atom";
+import { useCartActions } from "@/components/custom/customer/cart/use-cart-actions";
 
 export function CustomerNavbar({ user }: { user: NavbarUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { location, isRefreshing, refreshLocation } = useSharedLocation();
-  const cart = useAtomValue(cartAtom);
+  const { cart } = useCartActions();
   const router = useRouter();
-  const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   const submitSearch = (value: string) => {
     if (value.trim()) {

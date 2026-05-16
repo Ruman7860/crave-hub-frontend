@@ -2,8 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useAtomValue } from "jotai/react";
-import { cartAtom } from "@/atoms/cart.atom";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MenuCategory, MenuItem, Restaurant, RestaurantMenu, INR_FORMATTER } from "../customer-types";
 import {
@@ -15,7 +14,7 @@ import {
 } from "../common/customer-ui";
 import { QuantityStepper } from "../cart/quantity-stepper";
 import { useCartActions } from "../cart/use-cart-actions";
-import { Clock3, MapPin, Search, ShoppingBag, Sparkles, Star } from "lucide-react";
+import { Clock3, MapPin, Search, ShoppingBag, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type Group = MenuCategory & { items: MenuItem[] };
@@ -27,10 +26,14 @@ export function RestaurantDetailsClient({
   restaurant: Restaurant;
   menu: RestaurantMenu;
 }) {
-  const cart = useAtomValue(cartAtom);
-  const { addItem, updateQuantity } = useCartActions();
+  const { cart, isMutating, addItem, updateQuantity } = useCartActions();
   const [activeCategory, setActiveCategory] = useState(menu.categories[0]?.id ?? "all");
   const [query, setQuery] = useState("");
+  const [switchPrompt, setSwitchPrompt] = useState<{
+    menuItemId: string;
+    currentRestaurant: string;
+    nextRestaurant: string;
+  } | null>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   const groups = useMemo<Group[]>(() => {
@@ -51,8 +54,23 @@ export function RestaurantDetailsClient({
       .filter((group) => group.items.length > 0);
   }, [menu.categories, menu.items, query, restaurant.id]);
 
-  const cartQuantity = (itemId: string) => cart.items.find((item) => item.id === itemId)?.quantity ?? 0;
-  const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  const cartItemForMenuItem = (menuItemId: string) => cart?.items.find((item) => item.menuItemId === menuItemId) ?? null;
+  const cartQuantity = (menuItemId: string) => cartItemForMenuItem(menuItemId)?.quantity ?? 0;
+  const cartCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+
+  const handleAddItem = async (menuItemId: string, forceReplace = false) => {
+    const result = await addItem(menuItemId, forceReplace);
+
+    if (!result.ok && result.error.code === "RESTAURANT_SWITCH_REQUIRED") {
+      setSwitchPrompt({
+        menuItemId,
+        currentRestaurant: result.error.currentRestaurant?.name ?? "your current restaurant",
+        nextRestaurant: result.error.nextRestaurant?.name ?? restaurant.name,
+      });
+    } else {
+      setSwitchPrompt(null);
+    }
+  };
 
   const scrollToCategory = (id: string) => {
     setActiveCategory(id);
@@ -166,8 +184,12 @@ export function RestaurantDetailsClient({
                     item={item}
                     restaurant={restaurant}
                     quantity={cartQuantity(item.id)}
-                    onAdd={() => addItem({ id: restaurant.id, name: restaurant.name, image: restaurant.images?.[0] }, item)}
-                    onQuantityChange={(quantity) => updateQuantity(item.id, quantity)}
+                    disabled={isMutating}
+                    onAdd={() => handleAddItem(item.id)}
+                    onQuantityChange={(quantity) => {
+                      const cartItem = cartItemForMenuItem(item.id);
+                      if (cartItem) void updateQuantity(cartItem.id, quantity);
+                    }}
                   />
                 ))}
               </div>
@@ -180,12 +202,34 @@ export function RestaurantDetailsClient({
         <Link href="/cart" className="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-xl items-center justify-between rounded-2xl bg-zinc-950 px-5 py-4 text-white shadow-2xl">
           <div>
             <p className="text-sm font-bold">{cartCount} items selected</p>
-            <p className="text-xs text-zinc-300">{cart.restaurant?.name}</p>
+            <p className="text-xs text-zinc-300">{cart?.restaurant.name}</p>
           </div>
           <span className="inline-flex items-center gap-2 text-sm font-black text-orange-300">
             <ShoppingBag className="size-4" /> View cart
           </span>
         </Link>
+      ) : null}
+
+      {switchPrompt ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-4 sm:items-center">
+          <div className="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200 dark:bg-zinc-950">
+            <h3 className="text-xl font-black text-zinc-950 dark:text-zinc-50">Start a new cart?</h3>
+            <p className="mt-2 text-sm leading-6 text-zinc-500">
+              Your cart has items from {switchPrompt.currentRestaurant}. Adding this will clear that cart and start a new one from {switchPrompt.nextRestaurant}.
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <Button variant="outline" className="h-11 rounded-2xl" onClick={() => setSwitchPrompt(null)}>
+                Keep old cart
+              </Button>
+              <Button
+                className="h-11 rounded-2xl bg-orange-600 text-white hover:bg-orange-700"
+                onClick={() => handleAddItem(switchPrompt.menuItemId, true)}
+              >
+                Replace cart
+              </Button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );
@@ -195,12 +239,14 @@ function MenuItemCard({
   item,
   restaurant,
   quantity,
+  disabled,
   onAdd,
   onQuantityChange,
 }: {
   item: MenuItem;
   restaurant: Restaurant;
   quantity: number;
+  disabled: boolean;
   onAdd: () => void;
   onQuantityChange: (quantity: number) => void;
 }) {
@@ -236,7 +282,7 @@ function MenuItemCard({
         <div className="absolute inset-x-0 bottom-3 flex justify-center">
           <QuantityStepper
             quantity={quantity}
-            disabled={!item.isAvailable || !restaurant.isOpen}
+            disabled={disabled || !item.isAvailable || !restaurant.isOpen}
             onChange={(nextQuantity) => (quantity === 0 ? onAdd() : onQuantityChange(nextQuantity))}
           />
         </div>

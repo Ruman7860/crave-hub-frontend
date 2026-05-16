@@ -67,6 +67,69 @@ export type CustomerAddress = {
   isDefault?: boolean;
 };
 
+export type CartItemStatus =
+  | "valid"
+  | "unavailable"
+  | "deleted"
+  | "price_changed"
+  | "restaurant_closed";
+
+export type CartPricing = {
+  itemTotal: number;
+  discountedSubtotal: number;
+  discount: number;
+  deliveryFee: number;
+  platformFee: number;
+  taxes: number;
+  total: number;
+};
+
+export type CartItem = {
+  id: string;
+  cartId: string;
+  menuItemId: string;
+  restaurantId: string;
+  itemName: string;
+  itemImage: string | null;
+  price: number;
+  discountedPrice: number | null;
+  isVeg: boolean | null;
+  quantity: number;
+  status: CartItemStatus;
+  message?: string;
+  currentPrice?: number | null;
+  currentDiscountedPrice?: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CartResponse = {
+  id: string;
+  userId: string;
+  restaurantId: string;
+  restaurant: {
+    id: string;
+    name: string;
+    image: string | null;
+    isOpen: boolean;
+  };
+  items: CartItem[];
+  pricing: CartPricing;
+  validation: {
+    isValid: boolean;
+    issues: {
+      itemId?: string;
+      menuItemId?: string;
+      status: CartItemStatus;
+      message: string;
+      currentPrice?: number | null;
+      currentDiscountedPrice?: number | null;
+    }[];
+  };
+  createdAt: string;
+  updatedAt: string;
+};
+
 export const INR_FORMATTER = new Intl.NumberFormat("en-IN", {
   style: "currency",
   currency: "INR",

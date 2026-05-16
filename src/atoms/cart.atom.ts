@@ -1,32 +1,18 @@
-import { atomWithStorage } from "jotai/utils";
-
-export type CartRestaurant = {
-  id: string;
-  name: string;
-  image?: string | null;
-};
-
-export type CartItem = {
-  id: string;
-  restaurantId: string;
-  name: string;
-  image?: string | null;
-  price: number;
-  discountedPrice?: number | null;
-  isVeg?: boolean | null;
-  quantity: number;
-};
+import { atom } from "jotai";
+import { CartResponse } from "@/components/custom/customer/customer-types";
 
 export type CartState = {
-  restaurant: CartRestaurant | null;
-  items: CartItem[];
-  updatedAt: number | null;
+  cart: CartResponse | null;
+  isLoading: boolean;
+  isMutating: boolean;
+  error: string | null;
+  hydrated: boolean;
 };
 
-export const emptyCart: CartState = {
-  restaurant: null,
-  items: [],
-  updatedAt: null,
-};
-
-export const cartAtom = atomWithStorage<CartState>("crave-hub-cart", emptyCart);
+export const cartAtom = atom<CartState>({
+  cart: null,
+  isLoading: false,
+  isMutating: false,
+  error: null,
+  hydrated: false,
+});

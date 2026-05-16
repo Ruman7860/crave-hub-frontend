@@ -32,7 +32,8 @@ const filters: { key: FilterKey; label: string; icon: React.ElementType }[] = [
 export function CustomerHomeClient({ initialRestaurants }: { initialRestaurants: Restaurant[] }) {
   const searchParams = useSearchParams();
   const { location } = useSharedLocation();
-  const cart = useAtomValue(cartAtom);
+  const cartState = useAtomValue(cartAtom);
+  const cart = cartState.cart;
   const [restaurants, setRestaurants] = useState(initialRestaurants);
   const [query, setQuery] = useState(searchParams.get("search") ?? "");
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
@@ -43,7 +44,11 @@ export function CustomerHomeClient({ initialRestaurants }: { initialRestaurants:
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    setRecentSearches(JSON.parse(window.localStorage.getItem("crave-hub-recent-searches") ?? "[]") as string[]);
+    const id = window.setTimeout(() => {
+      setRecentSearches(JSON.parse(window.localStorage.getItem("crave-hub-recent-searches") ?? "[]") as string[]);
+    }, 0);
+
+    return () => window.clearTimeout(id);
   }, []);
 
   useEffect(() => {
@@ -56,8 +61,6 @@ export function CustomerHomeClient({ initialRestaurants }: { initialRestaurants:
           isOpen: activeFilter === "open" ? true : undefined,
           radiusKm: 20,
         });
-
-        console.log("Res Results -> ",result)
 
         if (!Array.isArray(result)) {
           setError(result.error ?? "Unable to search restaurants");
@@ -129,7 +132,7 @@ export function CustomerHomeClient({ initialRestaurants }: { initialRestaurants:
                   className="w-full bg-transparent text-sm font-semibold outline-none placeholder:text-zinc-400"
                 />
               </div>
-              {/* <select
+              <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortKey)}
                 className="h-13 rounded-2xl border border-white/10 bg-white/10 px-4 text-sm font-bold text-white outline-none"
@@ -137,7 +140,7 @@ export function CustomerHomeClient({ initialRestaurants }: { initialRestaurants:
                 <option className="text-zinc-950" value="nearby">Nearest first</option>
                 <option className="text-zinc-950" value="fast">Fast delivery</option>
                 <option className="text-zinc-950" value="popular">Popular</option>
-              </select> */}
+              </select>
             </div>
             {recentSearches.length ? (
               <div className="mt-4 flex flex-wrap gap-2">
@@ -154,7 +157,7 @@ export function CustomerHomeClient({ initialRestaurants }: { initialRestaurants:
               </div>
             ) : null}
           </div>
-          {/* <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {[
               ["Restaurants", sortedRestaurants.length],
               ["Open now", openRestaurants.length],
@@ -166,7 +169,7 @@ export function CustomerHomeClient({ initialRestaurants }: { initialRestaurants:
                 <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-zinc-300">{label}</p>
               </div>
             ))}
-          </div> */}
+          </div>
         </div>
       </section>
 
@@ -224,11 +227,11 @@ export function CustomerHomeClient({ initialRestaurants }: { initialRestaurants:
         </div>
       )}
 
-      {cart.items.length ? (
+      {cart?.items.length ? (
         <Link href="/cart" className="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-xl items-center justify-between rounded-2xl bg-zinc-950 px-5 py-4 text-white shadow-2xl sm:bottom-6">
           <div>
             <p className="text-sm font-bold">{cart.items.reduce((sum, item) => sum + item.quantity, 0)} items in cart</p>
-            <p className="text-xs text-zinc-300">{cart.restaurant?.name}</p>
+            <p className="text-xs text-zinc-300">{cart.restaurant.name}</p>
           </div>
           <span className="text-sm font-black text-orange-300">View cart</span>
         </Link>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type React from "react";
-import { AlertCircle, Clock3, Leaf, MapPin, Search, Sparkles, Star, Utensils } from "lucide-react";
+import { AlertCircle, Clock3, MapPin, Search, Utensils } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Restaurant } from "../customer-types";
 

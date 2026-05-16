@@ -26,11 +26,11 @@ export function QuantityStepper({
 
   return (
     <div className="grid h-9 min-w-24 grid-cols-3 overflow-hidden rounded-xl border border-orange-200 bg-white text-orange-600 shadow-sm">
-      <button type="button" onClick={() => onChange(quantity - 1)} className="flex items-center justify-center transition hover:bg-orange-50">
+      <button aria-label="Decrement" type="button" onClick={() => onChange(quantity - 1)} className="flex items-center justify-center transition hover:bg-orange-50">
         <Minus className="size-4" />
       </button>
       <span className="flex items-center justify-center text-sm font-black">{quantity}</span>
-      <button type="button" onClick={() => onChange(quantity + 1)} className="flex items-center justify-center transition hover:bg-orange-50">
+      <button aria-label="Increment" type="button" onClick={() => onChange(quantity + 1)} className="flex items-center justify-center transition hover:bg-orange-50">
         <Plus className="size-4" />
       </button>
     </div>
