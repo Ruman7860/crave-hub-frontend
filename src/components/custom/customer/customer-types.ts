@@ -135,3 +135,88 @@ export const INR_FORMATTER = new Intl.NumberFormat("en-IN", {
   currency: "INR",
   maximumFractionDigits: 0,
 });
+
+export type Address = {
+  id: string;
+  userId: string;
+  label: string | null;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2: string | null;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  latitude: number;
+  longitude: number;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OrderStatus =
+  | 'PENDING_PAYMENT' | 'PAYMENT_FAILED' | 'PLACED' | 'CONFIRMED'
+  | 'PREPARING' | 'READY_FOR_PICKUP' | 'OUT_FOR_DELIVERY'
+  | 'DELIVERED' | 'CANCELLED' | 'REFUNDED';
+
+export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED' | 'EXPIRED';
+
+export type OrderItem = {
+  id: string;
+  orderId: string;
+  menuItemId: string | null;
+  itemName: string;
+  itemImage: string | null;
+  quantity: number;
+  price: number;
+  discountedPrice: number | null;
+  isVeg: boolean | null;
+  createdAt: string;
+};
+
+export type Order = {
+  id: string;
+  userId: string;
+  restaurantId: string;
+  restaurantName: string;
+  restaurantPhone: string;
+  deliveryFullName: string;
+  deliveryPhone: string;
+  deliveryAddressLine1: string;
+  deliveryAddressLine2: string | null;
+  deliveryCity: string;
+  deliveryState: string;
+  deliveryCountry: string;
+  deliveryPostalCode: string;
+  deliveryLatitude: number;
+  deliveryLongitude: number;
+  paymentStatus: PaymentStatus;
+  paymentMethod: string | null;
+  paymentReferenceId: string | null;
+  status: OrderStatus;
+  subtotal: number;
+  taxAmount: number;
+  deliveryFee: number;
+  platformFee: number;
+  discountAmount: number;
+  totalAmount: number;
+  estimatedDeliveryTime: number | null;
+  notes: string | null;
+  cancelReason: string | null;
+  items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CheckoutResponse = {
+  orderId: string;
+  paymentDetails: {
+    provider: string;
+    providerOrderId: string;
+    amount: number;
+    currency: string;
+    key?: string;
+    clientSecret?: string;
+  };
+};
