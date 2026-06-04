@@ -38,6 +38,8 @@ export function OrderDetailClient({ order: initialOrder }: { order: Order }) {
 
   const { on } = useSocket("/orders", "user", order.userId);
 
+  console.log("order", order)
+
   useEffect(() => {
     const cleanup = on("ORDER_STATUS_UPDATED", (updatedOrder: Order) => {
       if (updatedOrder.id === order.id) {

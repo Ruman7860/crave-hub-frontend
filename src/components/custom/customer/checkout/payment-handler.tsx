@@ -23,8 +23,10 @@ export function PaymentHandler({ orderId, paymentDetails }: PaymentHandlerProps)
 
   useEffect(() => {
     if (paymentDetails.provider === "RAZORPAY") {
+      console.log("Loading Razorpay");
       loadRazorpay();
     } else if (paymentDetails.provider === "STRIPE") {
+      console.log("Loading Stripe");
       loadStripe();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,20 +58,26 @@ export function PaymentHandler({ orderId, paymentDetails }: PaymentHandlerProps)
 
     setStatus("processing");
 
+    console.log("payment details -> ", paymentDetails);
+
+    const { amount, currency, keyId, orderId: razorpayOrderId } = paymentDetails.providerData || {};
+
     const options = {
-      key: paymentDetails.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
-      amount: paymentDetails.amount,
-      currency: paymentDetails.currency,
-      order_id: paymentDetails.providerOrderId,
+      key: keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+      amount,
+      currency,
+      order_id: razorpayOrderId,
       name: "CraveHub",
       description: "Food Order Payment",
       theme: { color: "#ea580c" },
       handler: () => {
         // Frontend callback — backend webhook decides actual success
-        router.push(`/orders/${orderId}?status=verifying`);
+        console.log("Payment handler called");
+        window.location.href = `/orders/${orderId}?status=verifying`;
       },
       modal: {
         ondismiss: () => {
+          console.log("Payment cancelled");
           setStatus("error");
           setErrorMsg("Payment was cancelled. You can retry from your orders page.");
         },

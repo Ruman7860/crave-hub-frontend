@@ -29,6 +29,8 @@ export async function initiateCheckout(data: {
   const headers = await authHeaders();
   if (!headers) return { error: "Unauthorized", statusCode: 401 };
 
+  console.log("Payment Data -> ", JSON.stringify(data));
+
   const res = await fetch(`${restaurantBaseUrl}/api/checkout`, {
     method: "POST",
     headers,
@@ -44,6 +46,8 @@ export async function initiateCheckout(data: {
       statusCode: res.status,
     };
   }
+
+  console.log("Initiate Checkout Response -> ", JSON.stringify(result))
 
   return result as CheckoutResponse;
 }
